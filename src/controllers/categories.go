@@ -25,7 +25,6 @@ func FindAllCategories(c *fiber.Ctx) error {
 func FindCategoryByID(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	category, err := models.FindCategoryByID(id)
-	fmt.Println("category >> ", category)
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"code":    fiber.StatusNotFound,
@@ -71,8 +70,8 @@ func UpdateCategory(c *fiber.Ctx) error {
 	err = models.UpdateCategory(id, &category)
 	if err != nil {
 		return c.JSON(fiber.Map{
-			"code":    fiber.StatusInternalServerError,
-			"message": fmt.Sprintf("Failed to update product with ID %d", id),
+			"code":    fiber.StatusNotFound,
+			"message": fmt.Sprintf("Failed to update category with ID %d because there is no category with such id", id),
 		})
 	}
 	return c.JSON(fiber.Map{
@@ -86,8 +85,8 @@ func DeleteCategory(c *fiber.Ctx) error {
 	err := models.DeleteCategory(id)
 	if err != nil {
 		return c.JSON(fiber.Map{
-			"code":    fiber.StatusInternalServerError,
-			"message": fmt.Sprintf("Failed to delete product with ID %d", id),
+			"code":    fiber.StatusNotFound,
+			"message": fmt.Sprintf("Failed to delete category with ID %d because there is no category with such id", id),
 		})
 	}
 	return c.JSON(fiber.Map{

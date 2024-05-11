@@ -4,6 +4,7 @@ import (
 	"belajar-fiber/src/configs"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -41,11 +42,18 @@ func CreateCategory(c *Category) error {
 }
 
 func UpdateCategory(id int, category *Category) error {
-	err := configs.DB.Model(&Category{}).Where("id = ?", id).Updates(category).Error
-	return err
+	result := configs.DB.Model(&Category{}).Where("id = ?", id).Updates(category)
+	if result.RowsAffected == 0 {
+		return fiber.ErrNotFound
+	}
+
+	return result.Error
 }
 
 func DeleteCategory(id int) error {
-	err := configs.DB.Delete(&Category{}, "id = ?", id).Error
-	return err
+	result := configs.DB.Delete(&Category{}, "id = ?", id)
+	if result.RowsAffected == 0 {
+		return fiber.ErrNotFound
+	}
+	return result.Error
 }

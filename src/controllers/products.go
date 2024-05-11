@@ -1,104 +1,99 @@
 package controllers
 
-// import (
-// 	"belajar-fiber/src/models"
-// 	"fmt"
-// 	"slices"
+import (
+	"belajar-fiber/src/models"
+	"fmt"
+	"strconv"
 
-// 	"strconv"
+	"github.com/gofiber/fiber/v2"
+)
 
-// 	"github.com/gofiber/fiber/v2"
-// )
+func FindAllProducts(c *fiber.Ctx) error {
+	products, err := models.FindAllProducts()
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Products is not found",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"code":   fiber.StatusOK,
+		"status": "ok",
+		"data":   products,
+	})
+}
 
-// var product models.Product
-// var products = product.Init()
+func FindProductById(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
 
-// func GetAllProducts(c *fiber.Ctx) error {
-// 	return c.JSON(products)
-// }
+	product, err := models.FindProductByID(id)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"code":    fiber.StatusNotFound,
+			"message": "Product is not found",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"code":   fiber.StatusOK,
+		"status": "ok",
+		"data":   product,
+	})
+}
 
-// func GetProductById(c *fiber.Ctx) error {
-// 	id, _ := strconv.Atoi(c.Params("id"))
+func CreateProduct(c *fiber.Ctx) error {
+	var product models.Product
+	err := c.BodyParser(&product)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"code":    fiber.StatusBadRequest,
+			"message": "Invalid request body",
+		})
+	}
 
-// 	foundIndex := slices.IndexFunc(products, func(p models.Product) bool {
-// 		return p.ID == id
-// 	})
+	err = models.CreateProduct(&product)
+	if err != nil {
+		return err
+	}
 
-// 	if foundIndex == -1 {
-// 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-// 			"message": fmt.Sprintf("Product with ID %d is not found", id),
-// 		})
-// 	}
+	return c.JSON(fiber.Map{
+		"code":   fiber.StatusCreated,
+		"status": "created",
+	})
+}
 
-// 	foundProduct := products[foundIndex]
+func UpdateProduct(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	var product models.Product
+	err := c.BodyParser(&product)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"code":    fiber.StatusBadRequest,
+			"message": "Invalid request body",
+		})
+	}
+	err = models.UpdateProduct(id, &product)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"code":    fiber.StatusNotFound,
+			"message": fmt.Sprintf("Failed to update product with ID %d because there is no product with such id", id),
+		})
+	}
+	return c.JSON(fiber.Map{
+		"code":   fiber.StatusOK,
+		"status": "ok",
+	})
+}
 
-// 	return c.JSON(foundProduct)
-// }
-
-// func CreateProduct(c *fiber.Ctx) error {
-// 	var newProduct models.Product
-// 	err := c.BodyParser(&newProduct)
-// 	if err != nil {
-// 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-// 			"message": "Invalid request body",
-// 		})
-// 		return err
-// 	}
-
-// 	newProduct.ID = len(products) + 1
-// 	products = append(products, newProduct)
-
-// 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-// 		"message": "product created successfully",
-// 		"product": newProduct,
-// 	})
-// }
-
-// func UpdateProduct(c *fiber.Ctx) error {
-// 	id, _ := strconv.Atoi(c.Params("id"))
-
-// 	var updatedProduct models.Product
-// 	err := c.BodyParser(&updatedProduct)
-// 	if err != nil {
-// 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-// 			"message": "Invalid request body",
-// 		})
-// 		return err
-// 	}
-
-// 	foundIndex := slices.IndexFunc(products, func(p models.Product) bool {
-// 		return p.ID == id
-// 	})
-
-// 	if foundIndex == -1 {
-// 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-// 			"message": fmt.Sprintf("Product with ID %d is not found", id),
-// 		})
-// 	}
-
-// 	updatedProduct.ID = id
-// 	products[foundIndex] = updatedProduct
-// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-// 		"message": fmt.Sprintf("Product with ID %d updated successfully", id),
-// 		"product": updatedProduct,
-// 	})
-// }
-
-// func DeleteProduct(c *fiber.Ctx) error {
-// 	id, _ := strconv.Atoi(c.Params("id"))
-
-// 	foundIndex := slices.IndexFunc(products, func(p models.Product) bool {
-// 		return p.ID == id
-// 	})
-
-// 	if foundIndex == -1 {
-// 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-// 			"message": fmt.Sprintf("Product with ID %d is not found", id),
-// 		})
-// 	}
-
-// 	products = append(products[:foundIndex], products[foundIndex+1:]...)
-// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-// 		"message": fmt.Sprintf("Product with ID %d deleted successfully", id),
-// 	})
-// }
+func DeleteProduct(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	err := models.DeleteProduct(id)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"code":    fiber.StatusNotFound,
+			"message": fmt.Sprintf("Failed to delete product with ID %d because there is no product with such id", id),
+		})
+	}
+	return c.JSON(fiber.Map{
+		"code":   fiber.StatusOK,
+		"status": "ok",
+	})
+}
