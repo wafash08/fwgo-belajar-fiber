@@ -7,9 +7,11 @@ import (
 )
 
 func Router(app *fiber.App) {
-	app.Get("/products", controllers.GetAllProducts)
-	app.Get("/products/:id", controllers.GetProductById)
-	app.Post("/products", controllers.CreateProduct)
-	app.Put("/products/:id", controllers.UpdateProduct)
-	app.Delete("/products/:id", controllers.DeleteProduct)
+	api := app.Group("/api/v1")
+	categories := api.Group("/categories")
+	categories.Get("/", controllers.FindAllCategories)
+	categories.Get("/:id", controllers.FindCategoryByID)
+	categories.Post("/", controllers.CreateCategory)
+	categories.Put("/:id", controllers.UpdateCategory)
+	categories.Delete("/:id", controllers.DeleteCategory)
 }

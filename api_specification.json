@@ -1,0 +1,70 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "ECommerce RESTful API",
+		"description": "API specification for ECommerce RESTful API",
+		"version": "1.0.0"
+	},
+	"servers": [
+		{
+			"url": "http://localhost:3000/api"
+		}
+	],
+	"paths": {
+		"/categories": {
+			"get": {
+				"tags": ["Category API"],
+				"description": "List of all categories",
+				"summary": "List of all categories",
+				"responses": {
+					"200": {
+						"description": "Success get all categories",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"code": {
+											"type": "number"
+										},
+										"status": {
+											"type": "string"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"properties": {
+													"id": {
+														"type": "number"
+													},
+													"name": {
+														"type": "string"
+													},
+													"color": {
+														"type": "string"
+													},
+													"image": {
+														"type": "string"
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"updated_at": {
+														"type": "string"
+													},
+													"deleted_at": {
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
