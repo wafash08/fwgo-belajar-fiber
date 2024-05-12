@@ -22,4 +22,12 @@ func Router(app *fiber.App) {
 	products.Post("/", controllers.CreateProduct)
 	products.Put("/:id", controllers.UpdateProduct)
 	products.Delete("/:id", controllers.DeleteProduct)
+
+	users := api.Group("/users")
+	users.Get("/", controllers.FindAllUsers)
+	users.Get("/:id", controllers.FindUserById)
+	users.Post("/register", controllers.RegisterUser)
+	users.Post("/login", controllers.LoginWithEmailAndPassword)
+	users.Put("/:id", controllers.UpdateUser)
+	users.Delete("/:id", controllers.DeleteUser)
 }
