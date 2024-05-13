@@ -23,11 +23,13 @@ type Product struct {
 	Image       string         `json:"image" gorm:"not null"`
 	Condition   string         `json:"condition" gorm:"not null"`
 	Description string         `json:"description"`
+	CategoryID  uint           `json:"category_id"`
+	Category    Category       `gorm:"foreignKey:CategoryID"`
 }
 
 func FindAllProducts() ([]*Product, error) {
 	var products []*Product
-	err := configs.DB.Find(&products).Error
+	err := configs.DB.Preload("Category").Find(&products).Error
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +38,7 @@ func FindAllProducts() ([]*Product, error) {
 
 func FindProductByID(id int) (*Product, error) {
 	var product Product
-	err := configs.DB.Take(&product, "id = ?", id).Error
+	err := configs.DB.Preload("Category").Take(&product, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}

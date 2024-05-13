@@ -16,11 +16,12 @@ type Category struct {
 	Name      string         `json:"name" gorm:"not null"`
 	Color     string         `json:"color" gorm:"not null"`
 	Image     string         `json:"image" gorm:"not null"`
+	Products  []Product      `json:"products"`
 }
 
 func FindAllCategories() ([]*Category, error) {
 	var categories []*Category
-	err := configs.DB.Find(&categories).Error
+	err := configs.DB.Preload("Products").Find(&categories).Error
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +30,7 @@ func FindAllCategories() ([]*Category, error) {
 
 func FindCategoryByID(id int) (*Category, error) {
 	var category Category
-	err := configs.DB.Take(&category, "id = ?", id).Error
+	err := configs.DB.Preload("Products").Take(&category, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}

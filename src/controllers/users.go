@@ -106,8 +106,8 @@ func UpdateUser(c *fiber.Ctx) error {
 			"message": fmt.Sprintf("Failed to update user with ID %d because there is no product with such id", id),
 		})
 	}
-	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{
-		"code":    fiber.StatusNoContent,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"code":    fiber.StatusOK,
 		"status":  "ok",
 		"message": fmt.Sprintf("User with id %d successfully updated.", id),
 	})
@@ -122,8 +122,8 @@ func DeleteUser(c *fiber.Ctx) error {
 			"message": fmt.Sprintf("Failed to delete user with ID %d because there is no user with such id", id),
 		})
 	}
-	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{
-		"code":    fiber.StatusNoContent,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"code":    fiber.StatusOK,
 		"status":  "ok",
 		"message": fmt.Sprintf("User with id %d successfully deleted.", id),
 	})
