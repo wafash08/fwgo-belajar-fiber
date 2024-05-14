@@ -13,18 +13,18 @@ type Product struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"deleted_at"`
-	Name        string         `json:"name" gorm:"not null"`
+	Name        string         `json:"name" gorm:"not null" validate:"required,min=3,max=100"`
 	Brand       string         `json:"brand" gorm:"not null"`
 	Rating      int            `json:"rating" gorm:"default:0"`
-	Price       float64        `json:"price" gorm:"not null"`
+	Price       float64        `json:"price" gorm:"not null" validate:"required,min=0"`
 	Color       string         `json:"color" gorm:"not null"`
 	Size        int            `json:"size" gorm:"not null"`
-	Quantity    int            `json:"quantity" gorm:"default:1"`
+	Quantity    int            `json:"quantity" validate:"required,min=0"`
 	Image       string         `json:"image" gorm:"not null"`
 	Condition   string         `json:"condition" gorm:"not null"`
 	Description string         `json:"description"`
 	CategoryID  uint           `json:"category_id"`
-	Category    Category       `gorm:"foreignKey:CategoryID"`
+	Category    Category       `json:"category" gorm:"foreignKey:CategoryID"`
 }
 
 func FindAllProducts() ([]*Product, error) {

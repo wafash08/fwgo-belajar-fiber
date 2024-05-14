@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"belajar-fiber/src/helpers"
 	"belajar-fiber/src/models"
 	"fmt"
 	"strconv"
@@ -48,6 +49,10 @@ func CreateCategory(c *fiber.Ctx) error {
 			"message": "Invalid request body",
 		})
 	}
+	errors := helpers.ValidateStruct(category)
+	if len(errors) > 0 {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
+	}
 	err = models.CreateCategory(&category)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -71,6 +76,10 @@ func UpdateCategory(c *fiber.Ctx) error {
 			"message": "Invalid request body",
 		})
 	}
+	// errors := helpers.ValidateStruct(category)
+	// if len(errors) > 0 {
+	// 	return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
+	// }
 	err = models.UpdateCategory(id, &category)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{

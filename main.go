@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -22,6 +23,15 @@ func main() {
 		ReadTimeout:  time.Second * 5,
 		WriteTimeout: time.Second * 5,
 	})
+
+	// cors
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:  "*",
+		AllowMethods:  "GET,POST,HEAD,PUT,DELETE,PATCH",
+		AllowHeaders:  "*",
+		ExposeHeaders: "Content-Length",
+	}))
+
 	configs.InitDB()
 	helpers.Migration()
 	routes.Router(app)

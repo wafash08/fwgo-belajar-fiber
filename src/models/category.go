@@ -13,7 +13,7 @@ type Category struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
-	Name      string         `json:"name" gorm:"not null"`
+	Name      string         `json:"name" gorm:"not null" validate:"required,min=3,max=50"`
 	Color     string         `json:"color" gorm:"not null"`
 	Image     string         `json:"image" gorm:"not null"`
 	Products  []Product      `json:"products"`
