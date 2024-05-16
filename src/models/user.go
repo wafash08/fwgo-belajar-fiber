@@ -11,10 +11,11 @@ type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Name      string    `json:"name" gorm:"not null"`
-	Email     string    `json:"email" gorm:"not null;unique"`
-	Password  string    `json:"password" gorm:"not null"`
+	Name      string    `json:"name" gorm:"not null" validate:"required"`
+	Email     string    `json:"email" gorm:"not null;unique" validate:"required,email"`
+	Password  string    `json:"password" gorm:"not null" validate:"required"`
 	Role      string    `json:"role" gorm:"not null"`
+	Addresses []Address `json:"addresses"`
 }
 
 func FindAllUsers() ([]*User, error) {

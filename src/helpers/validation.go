@@ -2,8 +2,6 @@ package helpers
 
 import "github.com/go-playground/validator/v10"
 
-var validate = validator.New()
-
 type ErrorResponse struct {
 	FailedField string `json:"failed_field"`
 	Tag         string `json:"tag"`

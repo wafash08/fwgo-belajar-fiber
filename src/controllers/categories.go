@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mitchellh/mapstructure"
 )
 
 func FindAllCategories(c *fiber.Ctx) error {
@@ -41,7 +42,7 @@ func FindCategoryByID(c *fiber.Ctx) error {
 }
 
 func CreateCategory(c *fiber.Ctx) error {
-	var category models.Category
+	var category map[string]interface{}
 	err := c.BodyParser(&category)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -49,11 +50,16 @@ func CreateCategory(c *fiber.Ctx) error {
 			"message": "Invalid request body",
 		})
 	}
-	errors := helpers.ValidateStruct(category)
+	category = helpers.XSSMiddleware(category)
+
+	var newCategory models.Category
+	mapstructure.Decode(category, &newCategory)
+
+	errors := helpers.ValidateStruct(newCategory)
 	if len(errors) > 0 {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
 	}
-	err = models.CreateCategory(&category)
+	err = models.CreateCategory(&newCategory)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -68,7 +74,7 @@ func CreateCategory(c *fiber.Ctx) error {
 
 func UpdateCategory(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
-	var category models.Category
+	var category map[string]interface{}
 	err := c.BodyParser(&category)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -76,11 +82,19 @@ func UpdateCategory(c *fiber.Ctx) error {
 			"message": "Invalid request body",
 		})
 	}
-	// errors := helpers.ValidateStruct(category)
-	// if len(errors) > 0 {
-	// 	return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
-	// }
-	err = models.UpdateCategory(id, &category)
+
+	category = helpers.XSSMiddleware(category)
+
+	// Convert map to Category model using mapstructure
+	var updatedCategory models.Category
+	mapstructure.Decode(category, &updatedCategory)
+
+	errors := helpers.ValidateStruct(updatedCategory)
+	if len(errors) > 0 {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
+	}
+
+	err = models.UpdateCategory(id, &updatedCategory)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"code":    fiber.StatusNotFound,

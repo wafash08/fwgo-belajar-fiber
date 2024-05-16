@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mitchellh/mapstructure"
 )
 
 func FindAllProducts(c *fiber.Ctx) error {
@@ -41,7 +42,7 @@ func FindProductById(c *fiber.Ctx) error {
 }
 
 func CreateProduct(c *fiber.Ctx) error {
-	var product models.Product
+	var product map[string]interface{}
 	err := c.BodyParser(&product)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -50,12 +51,17 @@ func CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	errors := helpers.ValidateStruct(product)
+	product = helpers.XSSMiddleware(product)
+
+	var newProduct models.Product
+	mapstructure.Decode(product, &newProduct)
+
+	errors := helpers.ValidateStruct(newProduct)
 	if len(errors) > 0 {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
 	}
 
-	err = models.CreateProduct(&product)
+	err = models.CreateProduct(&newProduct)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -71,7 +77,7 @@ func CreateProduct(c *fiber.Ctx) error {
 
 func UpdateProduct(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
-	var product models.Product
+	var product map[string]interface{}
 	err := c.BodyParser(&product)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -79,11 +85,16 @@ func UpdateProduct(c *fiber.Ctx) error {
 			"message": "Invalid request body",
 		})
 	}
-	// errors := helpers.ValidateStruct(product)
-	// if len(errors) > 0 {
-	// 	return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
-	// }
-	err = models.UpdateProduct(id, &product)
+
+	product = helpers.XSSMiddleware(product)
+	var updatedProduct models.Product
+	mapstructure.Decode(product, &updatedProduct)
+
+	errors := helpers.ValidateStruct(updatedProduct)
+	if len(errors) > 0 {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
+	}
+	err = models.UpdateProduct(id, &updatedProduct)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"code":    fiber.StatusNotFound,

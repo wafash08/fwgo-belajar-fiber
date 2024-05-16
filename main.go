@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/joho/godotenv"
 )
 
@@ -23,6 +24,8 @@ func main() {
 		ReadTimeout:  time.Second * 5,
 		WriteTimeout: time.Second * 5,
 	})
+
+	app.Use(helmet.New())
 
 	// cors
 	app.Use(cors.New(cors.Config{

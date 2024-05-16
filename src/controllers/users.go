@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"belajar-fiber/src/helpers"
 	"belajar-fiber/src/models"
 	"fmt"
 	"strconv"
@@ -72,6 +73,11 @@ func RegisterUser(c *fiber.Ctx) error {
 			"code":    fiber.StatusBadRequest,
 			"message": "Invalid request body",
 		})
+	}
+
+	errors := helpers.ValidateStruct(user)
+	if len(errors) > 0 {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
 	}
 
 	err = models.CreateUser(&user)
