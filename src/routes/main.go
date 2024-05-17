@@ -2,6 +2,7 @@ package routes
 
 import (
 	"belajar-fiber/src/controllers"
+	"belajar-fiber/src/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,7 +18,8 @@ func Router(app *fiber.App) {
 	categories.Delete("/:id", controllers.DeleteCategory)
 
 	products := api.Group("/products")
-	products.Get("/", controllers.FindAllProducts)
+	// products.Get("/", controllers.FindAllProducts)
+	products.Get("/", middlewares.JwtMiddleware(), controllers.FindAllProducts)
 	products.Get("/:id", controllers.FindProductById)
 	products.Post("/", controllers.CreateProduct)
 	products.Put("/:id", controllers.UpdateProduct)
@@ -26,8 +28,10 @@ func Router(app *fiber.App) {
 	users := api.Group("/users")
 	users.Get("/", controllers.FindAllUsers)
 	users.Get("/:id", controllers.FindUserById)
-	users.Post("/register", controllers.RegisterUser)
-	users.Post("/login", controllers.LoginWithEmailAndPassword)
 	users.Put("/:id", controllers.UpdateUser)
 	users.Delete("/:id", controllers.DeleteUser)
+
+	auth := api.Group("/auth")
+	auth.Post("/register", controllers.RegisterUser)
+	auth.Post("/login", controllers.LoginWithEmailAndPassword)
 }

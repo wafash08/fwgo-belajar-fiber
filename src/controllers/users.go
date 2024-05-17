@@ -4,9 +4,12 @@ import (
 	"belajar-fiber/src/helpers"
 	"belajar-fiber/src/models"
 	"fmt"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func FindAllUsers(c *fiber.Ctx) error {
@@ -41,6 +44,17 @@ func FindUserById(c *fiber.Ctx) error {
 	})
 }
 
+type LoginResponse struct {
+	ID        uint             `json:"id"`
+	CreatedAt time.Time        `json:"created_at"`
+	UpdatedAt time.Time        `json:"updated_at"`
+	Name      string           `json:"name"`
+	Email     string           `json:"email"`
+	Role      string           `json:"role"`
+	Addresses []models.Address `json:"addresses"`
+	Token     string           `json:"token"`
+}
+
 func LoginWithEmailAndPassword(c *fiber.Ctx) error {
 	var user models.User
 	err := c.BodyParser(&user)
@@ -51,17 +65,38 @@ func LoginWithEmailAndPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	userFromDB, err := models.FindUserByEmailAndPassword(user.Email, user.Password)
+	userFromDB, err := models.FindUserByEmail(user.Email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"code": fiber.StatusNotFound, "message": "Email is not found"})
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(userFromDB.Password), []byte(user.Password))
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"code":    fiber.StatusUnauthorized,
 			"message": "Email or password is wrong",
 		})
 	}
+
+	token, err := helpers.GenerateToken(os.Getenv("SECRET_KEY"), user.Email)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": fiber.StatusInternalServerError, "message": "Failed to generate token"})
+	}
+
+	loginResponse := LoginResponse{
+		ID:        userFromDB.ID,
+		CreatedAt: userFromDB.CreatedAt,
+		UpdatedAt: userFromDB.UpdatedAt,
+		Name:      userFromDB.Name,
+		Role:      userFromDB.Role,
+		Email:     userFromDB.Email,
+		Addresses: userFromDB.Addresses,
+		Token:     token,
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"code":   fiber.StatusOK,
 		"status": "ok",
-		"data":   userFromDB,
+		"data":   loginResponse,
 	})
 }
 
@@ -79,6 +114,9 @@ func RegisterUser(c *fiber.Ctx) error {
 	if len(errors) > 0 {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
 	}
+
+	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	user.Password = string(hashPassword)
 
 	err = models.CreateUser(&user)
 	if err != nil {

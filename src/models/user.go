@@ -45,6 +45,12 @@ func FindUserByEmailAndPassword(email string, password string) (*User, error) {
 	return &user, nil
 }
 
+func FindUserByEmail(email string) (*User, error) {
+	var user User
+	result := configs.DB.Where("email = ?", email).Take(&user)
+	return &user, result.Error
+}
+
 func CreateUser(u *User) error {
 	err := configs.DB.Create(&u).Error
 	return err
